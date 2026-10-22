@@ -3,9 +3,10 @@
 import requests
 
 def test_obtener_usuarios():
-        url = "https://reqres.in/api/users/2"
+        #https://app.reqres.in/console
+        url = "https://reqres.in/api/users?page=2"
         header = {
-                "x-api-key" : "secrects_token"
+                "x-api-key" : "free_user_3L1hzp3PsDIicc3G8HU4BpBaO7G"
         },
         # 1. codigo http
         response = requests.get(url,headers=header);

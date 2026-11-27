@@ -1,5 +1,5 @@
 import base64
-
+import logging
 import pytest
 from pytest_html import extras as html_extras
 from selenium import webdriver
@@ -31,12 +31,29 @@ def driver_logueado(driver):
     driver.get(URL + "inventory.html")
     return driver
 
+@pytest.fixture(autouse=True)
+def registrar_inicio_y_fin(request):
+    """Registra en el log el inicio, el fin y el resultado de cada test (UI y API)."""
+    nombre = request.node.nodeid
+    logger.info("========== INICIO: %s ==========", nombre)
+    yield
+    reporte_setup = getattr(request.node, "reporte_setup", None)
+    reporte_call = getattr(request.node, "reporte_call", None)
+
+    if reporte_setup is not None and reporte_setup.failed:
+        logger.error("========== FIN: %s -> ERROR en la preparación ==========", nombre)
+    elif reporte_call is not None:
+        estado = reporte_call.outcome.upper()  # PASSED / FAILED / SKIPPED
+        nivel = logging.ERROR if reporte_call.failed else logging.INFO
+        logger.log(nivel, "========== FIN: %s -> %s (%.2f s) ==========", nombre, estado, reporte_call.duration)
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     """Si un test de UI falla, guarda una captura y la adjunta al reporte HTML."""
     resultado = yield
     reporte = resultado.get_result()
+    # Se guarda el reporte de cada fase (setup/call/teardown) para consultarlo al final del test
+    setattr(item, f"reporte_{reporte.when}", reporte)
 
     # Solo interesan los fallos en la preparación (setup) o en el test en sí (call)
     if reporte.when not in ("setup", "call") or not reporte.failed:

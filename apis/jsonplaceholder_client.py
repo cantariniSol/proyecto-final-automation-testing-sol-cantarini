@@ -1,6 +1,11 @@
+import logging
+
 import requests
 
 from configs.config import API_TIMEOUT, API_URL
+from configs.logger import obtener_logger
+
+logger = obtener_logger(__name__)
 
 
 class JsonPlaceholderClient:
@@ -15,9 +20,25 @@ class JsonPlaceholderClient:
         self.session = requests.Session()  # reutiliza la conexión entre peticiones
 
     def _enviar(self, metodo, endpoint, **kwargs):
-        """Envía la petición HTTP. Todas las llamadas pasan por acá (punto único para logs)."""
+        """Envía la petición HTTP y registra método, URL, cuerpo, código de estado y tiempo.
+
+        Todas las llamadas pasan por acá, así quedan registradas en un único lugar.
+        """
         url = f"{self.base_url}{endpoint}"
-        return self.session.request(metodo, url, timeout=API_TIMEOUT, **kwargs)
+        detalle = f" | params: {kwargs['params']}" if kwargs.get("params") else ""
+        detalle += f" | cuerpo: {kwargs['json']}" if "json" in kwargs else ""
+        logger.info("%s %s%s", metodo, url, detalle)
+
+        try:
+            respuesta = self.session.request(metodo, url, timeout=API_TIMEOUT, **kwargs)
+        except requests.RequestException as error:
+            logger.error("Falló la conexión con %s: %s", url, error)
+            raise
+
+        milisegundos = respuesta.elapsed.total_seconds() * 1000
+        nivel = logging.WARNING if respuesta.status_code >= 400 else logging.INFO
+        logger.log(nivel, "Respuesta %s en %.0f ms", respuesta.status_code, milisegundos)
+        return respuesta
 
     def cerrar(self):
         """Cierra la sesión HTTP."""

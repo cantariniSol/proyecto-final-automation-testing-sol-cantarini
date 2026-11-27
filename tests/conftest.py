@@ -2,11 +2,12 @@ import base64
 import logging
 import pytest
 from pytest_html import extras as html_extras
+from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-from configs.config import URL, USUARIO
+from configs.config import HEADLESS, URL, USUARIO
 from configs.logger import obtener_logger
 from helpers.capturas import guardar_captura
 
@@ -15,10 +16,24 @@ logger = obtener_logger(__name__)
 
 @pytest.fixture
 def driver():
-    """Abre un Chrome nuevo para cada test y lo cierra al terminar."""
+    """Abre un Chrome nuevo para cada test (con o sin ventana según HEADLESS) y lo cierra al terminar."""
+    opciones = Options()
+    if HEADLESS:
+        opciones.add_argument("--headless=new")           # sin interfaz gráfica
+        opciones.add_argument("--no-sandbox")             # requerido en contenedores Linux de CI
+        opciones.add_argument("--disable-dev-shm-usage")  # evita errores de memoria compartida en CI
+    opciones.add_argument("--window-size=1920,1080")      # tamaño fijo: capturas iguales en local y CI
+    # Desactiva el gestor de contraseñas y su aviso de "contraseña filtrada", que puede tapar la página
+    opciones.add_experimental_option("prefs", {
+        "credentials_enable_service": False,
+        "profile.password_manager_enabled": False,
+        "profile.password_manager_leak_detection": False,
+    })
+
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
-    driver.maximize_window()
+    driver = webdriver.Chrome(service=service, options=opciones)
+    if not HEADLESS:
+        driver.maximize_window()
     yield driver
     driver.quit()
 

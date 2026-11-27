@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Mi primer post automatizado",
+    "body": "Contenido creado desde pytest",
+    "userId": 1
+  },
+  {
+    "title": "Automatización con tildes y ñ",
+    "body": "Prueba de caracteres especiales: áéíóú ñ ¿? ¡!",
+    "userId": 5
+  }
+]

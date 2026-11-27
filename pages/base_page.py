@@ -3,7 +3,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from configs.config import TIMEOUT
 from configs.logger import obtener_logger
-from helpers.clicConEspera import clic_con_espera
+from helpers.esperas import clic_con_espera
 
 logger = obtener_logger(__name__)
 

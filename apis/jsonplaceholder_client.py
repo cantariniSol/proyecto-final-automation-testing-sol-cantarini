@@ -1,0 +1,51 @@
+import requests
+
+from configs.config import API_TIMEOUT, API_URL
+
+
+class JsonPlaceholderClient:
+    """Cliente de la API JSONPlaceholder.
+
+    Cumple el mismo rol que un Page Object en UI: los tests llaman a métodos con nombres
+    de negocio (crear_post, obtener_usuario...) y no se ocupan de URLs ni de detalles HTTP.
+    """
+
+    def __init__(self, base_url=API_URL):
+        self.base_url = base_url
+        self.session = requests.Session()  # reutiliza la conexión entre peticiones
+
+    def _enviar(self, metodo, endpoint, **kwargs):
+        """Envía la petición HTTP. Todas las llamadas pasan por acá (punto único para logs)."""
+        url = f"{self.base_url}{endpoint}"
+        return self.session.request(metodo, url, timeout=API_TIMEOUT, **kwargs)
+
+    def cerrar(self):
+        """Cierra la sesión HTTP."""
+        self.session.close()
+
+    # ---------- Posts ----------
+    def listar_posts(self, user_id=None):
+        """GET /posts (opcionalmente filtrado por usuario con ?userId=)."""
+        params = {"userId": user_id} if user_id is not None else None
+        return self._enviar("GET", "/posts", params=params)
+
+    def obtener_post(self, post_id):
+        """GET /posts/{id}"""
+        return self._enviar("GET", f"/posts/{post_id}")
+
+    def crear_post(self, datos):
+        """POST /posts con el cuerpo en JSON."""
+        return self._enviar("POST", "/posts", json=datos)
+
+    def eliminar_post(self, post_id):
+        """DELETE /posts/{id}"""
+        return self._enviar("DELETE", f"/posts/{post_id}")
+
+    # ---------- Usuarios y comentarios ----------
+    def obtener_usuario(self, user_id):
+        """GET /users/{id}"""
+        return self._enviar("GET", f"/users/{user_id}")
+
+    def listar_comentarios(self, post_id):
+        """GET /posts/{id}/comments"""
+        return self._enviar("GET", f"/posts/{post_id}/comments")

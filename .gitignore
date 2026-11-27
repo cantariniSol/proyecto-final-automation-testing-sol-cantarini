@@ -23,8 +23,10 @@ htmlcov/
 # Logs y evidencias generadas
 logs/*
 !logs/.gitkeep
-screenshot/*
-!screenshot/.gitkeep
+screenshots/*
+!screenshots/.gitkeep
+reports/*
+!reports/.gitkeep
 
 # Drivers descargados por webdriver-manager
 .wdm/

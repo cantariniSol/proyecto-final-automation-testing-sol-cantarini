@@ -47,12 +47,8 @@ class InventoryPage(BasePage):
 
     def esperar_cantidad(self, cantidad):
         """Espera a que el contador del carrito muestre la cantidad indicada."""
-        return self.wait.until(
-            EC.text_to_be_present_in_element(self.BADGE, str(cantidad))
-        )
+        return self.wait.until(EC.text_to_be_present_in_element(self.BADGE, str(cantidad)))
 
     def carrito_vacio(self):
         """Espera a que el contador del carrito desaparezca."""
         return self.wait.until(EC.invisibility_of_element_located(self.BADGE))
-        
-        

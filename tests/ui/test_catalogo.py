@@ -1,5 +1,8 @@
 from pages.inventory_page import InventoryPage
 from pages.product_page import ProductPage
+from configs.logger import obtener_logger
+
+logger = obtener_logger(__name__)
 
 REMERA = "Test.allTheThings() T-Shirt (Red)"
 MOCHILA = "Sauce Labs Backpack"
@@ -19,7 +22,7 @@ def test_catalogo(driver_logueado):
     nombre, precio = inventario.datos_primer_producto()
     assert nombre != "", "El primer producto no tiene nombre"
     assert precio.startswith("$"), f"Precio con formato inesperado: {precio}"
-    print(f"Primer producto: {nombre} - {precio}")
+    logger.info("Primer producto del catálogo: %s - %s", nombre, precio)
 
     # Detalle de la remera y volver
     inventario.abrir_detalle(REMERA)

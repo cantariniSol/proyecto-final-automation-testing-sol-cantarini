@@ -54,3 +54,18 @@ def test_crear_post(api, datos):
     for clave, valor in datos.items():
         assert creado[clave] == valor, f"'{clave}' no coincide con lo enviado"
     assert creado["id"] == 101, "JSONPlaceholder asigna siempre el id 101 a un post nuevo"
+
+def test_eliminar_post(api):
+    """DELETE /posts/1: código 200 y cuerpo vacío."""
+    respuesta = api.eliminar_post(1)
+
+    assert respuesta.status_code == 200
+    assert respuesta.json() == {}
+
+
+def test_obtener_post_inexistente_devuelve_404(api):
+    """Caso negativo: GET de un post que no existe devuelve 404 y un cuerpo vacío."""
+    respuesta = api.obtener_post(99999)
+
+    assert respuesta.status_code == 404
+    assert respuesta.json() == {}

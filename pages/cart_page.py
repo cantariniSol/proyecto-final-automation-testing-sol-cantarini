@@ -1,7 +1,7 @@
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 from pages.base_page import BasePage
-
 
 class CartPage(BasePage):
     ITEMS = (By.CLASS_NAME, "cart_item")
@@ -9,9 +9,13 @@ class CartPage(BasePage):
     CHECKOUT = (By.ID, "checkout")
     CONTINUAR = (By.ID, "continue-shopping")
     QUITAR_TEMPLATE = "remove-{}"
-
+    LISTA = (By.CLASS_NAME, "cart_list")
+    
     def nombres_productos(self):
+        """Devuelve los nombres de los productos del carrito (lista vacía si no hay ninguno)."""
         self.esperar_url("/cart.html")
+        # La URL cambia antes de que React dibuje la página: se espera a que la lista esté visible
+        self.wait.until(EC.visibility_of_element_located(self.LISTA))
         items = self.driver.find_elements(*self.ITEMS)
         return [i.find_element(*self.NOMBRE).text for i in items]
 
